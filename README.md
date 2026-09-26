@@ -1,11 +1,11 @@
-# Bring NAS-side HEIC/HEVC thumbnails back to Synology Photos on DSM 7.2.2+
+# Bring NAS-side HEIC/HEVC thumbnails back to Synology Photos on DSM 7.2.2+ — including HEIC from iOS 18+
 
 ```
 ame-shim/   the shim: install-shim.sh, stub.sh
 backlog/    repair items that already failed: run-batch.sh, commit-one.sh, gen-one.sh, config.sh
 ```
 
-**English** · [中文](#中文)
+**English** · [中文](#中文让-synology-photos-在-dsm-722-上重新由-nas-生成-heichevc-缩略图含-ios-18-的-heic)
 
 DSM 7.2.2 removed HEVC/HEIC decoding from the NAS. Since then Synology Photos cannot
 generate thumbnails for HEIC photos or HEVC videos on the server; Synology tells you
@@ -152,9 +152,9 @@ sudo ./install-shim.sh --off      # renames /var/packages/CodecPack, deletes not
 
 ---
 
-# 中文
+# 中文：让 Synology Photos 在 DSM 7.2.2+ 上重新由 NAS 生成 HEIC/HEVC 缩略图——含 iOS 18+ 的 HEIC
 
-**[English](#bring-nas-side-heichevc-thumbnails-back-to-synology-photos-on-dsm-722)** · 中文
+**[English](#bring-nas-side-heichevc-thumbnails-back-to-synology-photos-on-dsm-722--including-heic-from-ios-18)** · 中文
 
 DSM 7.2.2 起群晖把 HEVC / HEIC 解码从 NAS 上拿掉了。Synology Photos 从此不能在服务端给 HEIC 照片和
 HEVC 视频生成缩略图，官方让你在电脑上跑 *Image Assistant*。本文把这件事交还给 NAS：
