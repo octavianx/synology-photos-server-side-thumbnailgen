@@ -21,6 +21,7 @@ JOBS="${JOBS:-3}"; BATCH="${BATCH:-200}"; LIMIT=0; DRY=0
 while [ $# -gt 0 ]; do case "$1" in
   --limit) LIMIT="$2"; shift 2;; --dry-run) DRY=1; shift;; *) echo "unknown option $1"; exit 2;; esac; done
 
+[ "$DRY" = 1 ] || require_tested_photos_version || exit 5
 HERE=$(cd "$(dirname "$0")" && pwd)
 export STAGE=$WORK/stage PHOTOS_DIR WORK
 LOG=$WORK/log/run-$(date +%F-%H%M%S).log; SKIP=$WORK/skip.ids

@@ -77,28 +77,37 @@ tail ame-shim/log/calls.log.stderr
 grep synothumb /var/log/messages | tail   # DSM's own errors, with the full command line
 ```
 
-## Existing backlog
+## Photos and videos already in your library
 
-The shim only affects files indexed after it is installed. Files that already failed are
-marked `status = 3` in the Photos database and **are not retried** by Photos'
-"Re-index" or by `synofoto-bin-index-tool -t repair_undone` (tested). Your options:
+The shim only affects files indexed after it is installed. Anything that failed before is
+marked `status = 3` in the Photos database, and Photos **does not retry** those items —
+neither "Re-index" in the settings nor `synofoto-bin-index-tool -t repair_undone` touches
+them (tested). The scripts in [`backlog/`](backlog/) repair them: they generate the thumbnails
+with the same SynoCommunity decoders, then write the three database fields Photos expects,
+mirroring what the official client does.
 
-1. Re-upload the files, or move them out of the Photos folder and back in.
-2. Use the scripts in [`backlog/`](backlog/). They generate the thumbnails with the same
-   SynoCommunity decoders and write the three database fields Photos expects, mirroring what the
-   official client does:
+> ⚠️ **This writes to Synology's private database. Read the scripts before running them.**
+>
+> **Check your Synology Photos version first** (Package Center → Installed, or
+> `synopkg version SynologyPhotos`). The scripts were verified on **1.8.0-10070** only and
+> refuse to write on any other version. Another version may store thumbnails differently;
+> the scripts check that the columns and trigger they rely on still exist, but they cannot
+> detect a change in meaning. On an unverified version the likely failure modes are thumbnails
+> that Photos does not display, or ones it overwrites at the next re-index.
+> If you decide to try anyway: `ALLOW_UNTESTED=1`, start with `--limit 1`, check that item in
+> Photos in your browser, and use `--rollback` if it is wrong.
 
-   ```sh
-   cd backlog
-   sudo PHOTOS_USER=<your DSM user> ./run-batch.sh --dry-run    # generate into work/stage, commit nothing
-   sudo PHOTOS_USER=<your DSM user> ./run-batch.sh --limit 12   # small trial; check them in Photos
-   sudo PHOTOS_USER=<your DSM user> ./run-batch.sh              # the rest
-   ```
+```sh
+cd backlog
+sudo PHOTOS_USER=<your DSM user> ./run-batch.sh --dry-run    # decode into work/stage only; writes nothing, works on any version
+sudo PHOTOS_USER=<your DSM user> ./run-batch.sh --limit 12   # small trial; check the items in Photos
+sudo PHOTOS_USER=<your DSM user> ./run-batch.sh              # the rest
+sudo PHOTOS_USER=<your DSM user> ./commit-one.sh <id> --rollback   # undo one item
+```
 
-   They touch Synology's private database, so: read them first; `run-batch.sh` refuses to run if the
-   tables it relies on have changed; it dumps the two tables before writing; `commit-one.sh` moves
-   every `.fail` marker into `work/backup/<id>/` instead of deleting it and can roll one item back
-   (`./commit-one.sh <id> --rollback`). Tested on Photos 1.8.0-10070 only.
+Safety nets: `run-batch.sh` dumps the two tables it writes before the first change, stops on
+the first commit error, and skips anything the official client has already repaired;
+`commit-one.sh` moves every `.fail` marker into `work/backup/<id>/` instead of deleting it.
 
 ## Uninstall
 
@@ -212,25 +221,31 @@ tail ame-shim/log/calls.log.stderr
 grep synothumb /var/log/messages | tail   # DSM 自己的报错，带完整命令行
 ```
 
-## 已有的积压
+## 你已经上传到 NAS 的 Synology Photos 里的照片 / 视频
 
 垫片只影响装好之后才索引的文件。之前已经失败的文件在 Photos 数据库里标着 `status = 3`，
-Photos 的「重建索引」和 `synofoto-bin-index-tool -t repair_undone` **都不会重试**（实测）。两条路：
+Photos **不会重试**它们——设置里的「重建索引」和 `synofoto-bin-index-tool -t repair_undone`
+都不管这些（实测）。[`backlog/`](backlog/) 里的脚本负责修它们：用同一套 SynoCommunity 解码器
+生成缩略图，再照官方客户端的做法写 Photos 数据库里的三处字段。
 
-1. 重新上传，或把文件挪出 Photos 目录再挪回来。
-2. 用 [`backlog/`](backlog/) 里的脚本。它们用同一套 SynoCommunity 解码器生成缩略图，
-   并照官方客户端的做法写 Photos 数据库里的三处字段：
+> ⚠️ **这会写群晖的私有数据库。跑之前先读脚本。**
+>
+> **先核对你的 Synology Photos 版本**（套件中心 → 已安装，或 `synopkg version SynologyPhotos`）。
+> 脚本只在 **1.8.0-10070** 上验证过，遇到其他版本会拒绝写库。别的版本可能用不同方式存缩略图；
+> 脚本会检查它依赖的列和触发器还在不在，但查不出「字段还在、含义变了」。在未验证的版本上，
+> 可能的后果是 Photos 不显示生成的缩略图，或者下次重建索引时把它们覆盖掉。
+> 执意要试：加 `ALLOW_UNTESTED=1`，先 `--limit 1`，去浏览器的 Photos 里看那一张，不对就 `--rollback`。
 
-   ```sh
-   cd backlog
-   sudo PHOTOS_USER=<你的 DSM 用户名> ./run-batch.sh --dry-run    # 只生成到 work/stage，不提交
-   sudo PHOTOS_USER=<你的 DSM 用户名> ./run-batch.sh --limit 12   # 先试 12 个，去 Photos 里看
-   sudo PHOTOS_USER=<你的 DSM 用户名> ./run-batch.sh              # 剩下的
-   ```
+```sh
+cd backlog
+sudo PHOTOS_USER=<你的 DSM 用户名> ./run-batch.sh --dry-run    # 只解码到 work/stage，不写任何东西，任何版本都能跑
+sudo PHOTOS_USER=<你的 DSM 用户名> ./run-batch.sh --limit 12   # 先试 12 个，去 Photos 里看
+sudo PHOTOS_USER=<你的 DSM 用户名> ./run-batch.sh              # 剩下的
+sudo PHOTOS_USER=<你的 DSM 用户名> ./commit-one.sh <id> --rollback   # 回滚单个文件
+```
 
-   这会碰群晖的私有数据库，所以：先读脚本；`run-batch.sh` 发现依赖的表结构变了会拒绝执行；
-   写库前先导出两张表；`commit-one.sh` 把每个 `.fail` 标记挪到 `work/backup/<id>/` 而不是删掉，
-   单个文件可回滚（`./commit-one.sh <id> --rollback`）。只在 Photos 1.8.0-10070 上验证过。
+保险措施：`run-batch.sh` 在第一次写库前先导出它要改的两张表，遇到第一个提交错误就停，
+已被官方客户端修好的自动跳过；`commit-one.sh` 把每个 `.fail` 标记挪到 `work/backup/<id>/` 而不是删掉。
 
 ## 卸载
 

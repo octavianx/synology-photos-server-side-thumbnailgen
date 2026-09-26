@@ -44,6 +44,7 @@ SQL
 fi
 
 # ---- pre-flight ----
+require_tested_photos_version || exit 5
 for z in SM M XL; do
   f=$ST/$ID.$z.jpg
   [ "$(od -An -tx1 -N2 "$f" | tr -d ' ')" = "ffd8" ] && [ "$(stat -c %s "$f")" -gt 1000 ] \
