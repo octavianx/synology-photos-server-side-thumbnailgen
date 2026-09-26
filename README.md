@@ -8,9 +8,13 @@ backlog/    repair items that already failed: run-batch.sh, commit-one.sh, gen-o
 **English** · [中文](#中文让-synology-photos-在-dsm-722-上重新由-nas-生成-heichevc-缩略图含-ios-18-的-heic)
 
 DSM 7.2.2 removed HEVC/HEIC decoding from the NAS. Since then Synology Photos cannot
-generate thumbnails for HEIC photos or HEVC videos on the server; Synology tells you
-to run *Image Assistant* on your computer instead. This guide puts the work back on
-the NAS. It needs no Synology account, no downgrade, and changes no Synology file.
+generate thumbnails for HEIC photos or HEVC videos on the server. Synology's answer is
+**Synology Image Assistant**: a browser extension plus a desktop app (Windows/macOS) that
+decode the files on *your computer* and upload the results — so thumbnails only appear for
+files you have opened in a browser with the extension running.
+
+With this guide the NAS does that work itself again. You need neither the browser extension
+nor the desktop app. It needs no Synology account, no downgrade, and changes no Synology file.
 
 Tested on an x86_64 NAS running DSM 7.2.2-72806 Update 4 and Synology Photos 1.8.0-10070.
 Other architectures and versions are untested.
@@ -157,8 +161,12 @@ sudo ./install-shim.sh --off      # renames /var/packages/CodecPack, deletes not
 **[English](#bring-nas-side-heichevc-thumbnails-back-to-synology-photos-on-dsm-722--including-heic-from-ios-18)** · 中文
 
 DSM 7.2.2 起群晖把 HEVC / HEIC 解码从 NAS 上拿掉了。Synology Photos 从此不能在服务端给 HEIC 照片和
-HEVC 视频生成缩略图，官方让你在电脑上跑 *Image Assistant*。本文把这件事交还给 NAS：
-不需要群晖账号，不降级，不改任何群晖自带文件。
+HEVC 视频生成缩略图。群晖给的办法是 **Synology Image Assistant**：一个浏览器扩展加一个桌面 App
+（Windows / macOS），在*你的电脑上*解码再把结果传回 NAS——也就是说，只有你在装了扩展的浏览器里
+打开过的文件才会有缩略图。
+
+本文让 NAS 重新自己干这件事。浏览器扩展和桌面 App 都不再需要。不需要群晖账号，不降级，
+不改任何群晖自带文件。
 
 实测环境：x86_64 机型，DSM 7.2.2-72806 Update 4，Synology Photos 1.8.0-10070。其他架构和版本未测。
 
